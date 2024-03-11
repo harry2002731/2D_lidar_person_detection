@@ -19,21 +19,21 @@ detector = Detector(
 laser_fov_deg = 225
 detector.set_laser_fov(laser_fov_deg)
 
-global j ,scans
-j = 0
+global line_num ,scans
+line_num = 0
 
-csv = glob.glob(path + "*.csv")[10]
-scans = load_scan(csv)[2]
+csv = glob.glob(path + "*.csv")[10] #修改方括号内数字测试其余数据
+scans = load_scan(csv)[2] # load_scan返回值 seqs, times, scans
 
 def update(frame):
-    global j
+    global line_num
     global scans
 
     # 生成随机数据
     for i ,scan in enumerate(scans):
-        if j == i:
+        if line_num == i:
             x_,y_ = scan_to_xy(scan,laser_fov_deg)
-            dets_xy, dets_cls, instance_mask = detector(scan)  # (M, 2), (M,), (N,)
+            dets_xy, dets_cls, instance_mask = detector(scan)  # xy坐标位置、检测类别、暂时未知
             cls_thresh = 0.9
             cls_mask = dets_cls > cls_thresh
             dets_xy = dets_xy[cls_mask]
@@ -44,7 +44,7 @@ def update(frame):
 
             ax.set_xlim(-6, 6)  # 指定 y 轴的上下限范围
             ax.set_ylim(-6, 6)  # 指定 x 轴的上下限范围
-            j+=1
+            line_num += 1
             break
         
 

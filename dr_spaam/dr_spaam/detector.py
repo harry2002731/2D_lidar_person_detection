@@ -48,8 +48,8 @@ class Detector(object):
                     model
                 )
             )
-
-        ckpt = torch.load(ckpt_file)
+        ckpt = torch.load(ckpt_file,map_location=torch.device('cpu'))
+        # ckpt = torch.load(ckpt_file)
         self._model.load_state_dict(ckpt["model_state"])
 
         self._model.eval()

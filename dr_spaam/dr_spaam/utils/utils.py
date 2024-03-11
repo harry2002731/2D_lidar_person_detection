@@ -4,6 +4,7 @@ from scipy.ndimage import maximum_filter
 from scipy.spatial.distance import cdist
 import torch
 import cv2
+import json
 
 # from nms import nms
 
@@ -15,6 +16,59 @@ if "clip" in dir(np.core.umath):
 else:
     _clip = np.clip
     # print("use np.clip")
+
+
+############################################################################################
+
+
+def laser_angles(N, fov_deg):
+    fov_radian = np.radians(fov_deg)
+    return np.linspace(-fov_radian*0.5, fov_radian*0.5, N)
+
+def load_scan(fname):
+    data = np.genfromtxt(fname, delimiter=",")
+    seqs, times, scans = data[:,0].astype(np.uint32), data[:,1].astype(np.float32), data[:,2:].astype(np.float32)
+    return seqs, times, scans
+
+
+def load_odom(fname):
+    return np.genfromtxt(fname, delimiter=",", dtype=[('seq', 'u4'), ('t', 'f4'), ('xya', 'f4', 3)])
+
+
+def load_dets(name):
+    def _doload(fname):
+        seqs, dets = [], []
+        with open(fname) as f:
+            for line in f:
+                seq, tail = line.split(',', 1)
+                seqs.append(int(seq))
+                dets.append(json.loads(tail))
+        return seqs, dets
+
+    # s1, wcs = _doload(name.replace(DATADIR, LABELDIR) + '.wc')
+    # s2, was = _doload(name.replace(DATADIR, LABELDIR) + '.wa')
+    # s3, wps = _doload(name.replace(DATADIR, LABELDIR) + '.wp')
+
+    s1, wcs = _doload(name +'.wc')
+    s2, was = _doload(name + '.wa')
+    s3, wps = _doload(name + '.wp')
+
+    assert all(a == b == c for a, b, c in zip(s1, s2, s3)), "Uhhhh?"
+    return np.array(s1), wcs, was, wps
+
+def scan_to_xy(scan, fov, thresh=None):
+    s = np.array(scan, copy=True)
+    if thresh is not None:
+        s[s > thresh] = np.nan
+    return rphi_to_xy(s, laser_angles(len(scan), fov))
+
+
+def load_scan(fname):
+    data = np.genfromtxt(fname, delimiter=",")
+    seqs, times, scans = data[:,0].astype(np.uint32), data[:,1].astype(np.float32), data[:,2:].astype(np.float32)
+    return seqs, times, scans
+
+############################################################################################
 
 
 def get_drow_laser_phi():
@@ -46,7 +100,7 @@ def xy_to_rphi(x, y):
 
 
 def rphi_to_xy(r, phi):
-    return r * np.cos(phi), r * np.sin(phi)
+    return r * -np.sin(phi), r * np.cos(phi)
 
 
 def rphi_to_xy_torch(r, phi):
@@ -69,6 +123,19 @@ def canonical_to_global(scan_r, scan_phi, dx, dy):
     dets_phi = tmp_phi + scan_phi
     dets_r = tmp_y / np.cos(tmp_phi)
     return dets_r, dets_phi
+
+# def canonical_to_global(scan_r, scan_phi, dx, dy):
+#     # tmp_y = scan_r + dy
+#     # tmp_phi = np.arctan2(
+#     #     dx, tmp_y
+#     # )  # dx first is correct due to problem geometry dx -> y axis and vice versa.
+#     # dets_phi = tmp_phi + scan_phi
+#     # dets_r = tmp_y / np.cos(tmp_phi)
+#     x,y  = rphi_to_xy(scan_r,scan_phi)
+#     x += dx
+#     y+= dy
+#     return dets_r, dets_phi
+
 
 
 def canonical_to_global_torch(scan_r, scan_phi, dx, dy):
@@ -216,8 +283,8 @@ def scans_to_cutout(
     outbound_mask = np.logical_or(inds_ct < 0, inds_ct > num_pts - 1)
 
     # cutout (linear interp)
-    inds_ct_low = _clip(np.floor(inds_ct), 0, num_pts - 1).astype(np.int)
-    inds_ct_high = _clip(inds_ct_low + 1, 0, num_pts - 1).astype(np.int)
+    inds_ct_low = _clip(np.floor(inds_ct), 0, num_pts - 1).astype(np.int32)
+    inds_ct_high = _clip(inds_ct_low + 1, 0, num_pts - 1).astype(np.int32)
     inds_ct_ratio = _clip(inds_ct - inds_ct_low, 0.0, 1.0)
     inds_offset = (
         np.arange(num_scans).reshape(1, num_scans, 1) * num_pts

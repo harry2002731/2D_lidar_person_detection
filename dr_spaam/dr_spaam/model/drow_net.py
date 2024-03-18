@@ -69,7 +69,10 @@ class DrowNet(nn.Module):
         out = out.view(n_batch * n_cutout, out.shape[-2], out.shape[-1])
         out = self._conv_and_pool(out, self.conv_block_3)  # /8
         out = self.conv_block_4(out)
-        out = F.avg_pool1d(out, kernel_size=out.shape[-1])  # (B * CT, C, 1)
+        size = out.shape[-1]
+        if type(out.shape[-1]) is not int :
+            size =  out.shape[-1].item()
+        out = F.avg_pool1d(out, kernel_size=size)  # (B * CT, C, 1)
 
         pred_cls = self.conv_cls(out).view(n_batch, n_cutout, -1)  # (B, CT, cls)
         pred_reg = self.conv_reg(out).view(n_batch, n_cutout, 2)  # (B, CT, 2)

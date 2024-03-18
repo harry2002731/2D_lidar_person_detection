@@ -5,7 +5,7 @@ from dr_spaam.model.drow_net import DrowNet
 from dr_spaam.model.dr_spaam import DrSpaam
 from dr_spaam.utils import utils as u
 
-
+import copy
 class Detector(object):
     def __init__(
         self, ckpt_file, model="DROW3", gpu=True, stride=1, panoramic_scan=False
@@ -48,8 +48,8 @@ class Detector(object):
                     model
                 )
             )
-        ckpt = torch.load(ckpt_file,map_location=torch.device('cpu'))
-        # ckpt = torch.load(ckpt_file)
+        # ckpt = torch.load(ckpt_file,map_location=torch.device('cpu'))
+        ckpt = torch.load(ckpt_file)
         self._model.load_state_dict(ckpt["model_state"])
 
         self._model.eval()
@@ -79,10 +79,12 @@ class Detector(object):
             area_mode=True,
         )
         ct = torch.from_numpy(ct).float()
+        self.cttt = copy.deepcopy(ct.unsqueeze(dim=0))
+
 
         if self._gpu:
             ct = ct.cuda()
-
+        # print(ct.size())
         # inference
         with torch.no_grad():
             # one extra dimension for batch
@@ -101,8 +103,16 @@ class Detector(object):
             pred_cls[:, 0],
             pred_reg,
         )
-
         return dets_xy, dets_cls, instance_mask
+    
+    #将模型TorchScript化
+    def convert(self):
+        traced_script_module = torch.jit.trace(self._model, self.cttt)
+        output = traced_script_module(self.cttt)
+        traced_script_module.save('vgg16-trace.pt')
+        
+
+
 
     def set_laser_fov(self, fov_deg):
         self._laser_fov_deg = fov_deg

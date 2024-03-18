@@ -136,7 +136,7 @@ def _plot_pseudo_labels(batch_dict, ib):
         match_found = d_diff < 0.3  # (pl, gt)
         match_found = match_found.max(axis=1)
     else:
-        match_found = np.zeros(len(pl_xy), dtype=np.bool)
+        match_found = np.zeros(len(pl_xy), dtype=bool)
 
     # overlay image with laser
     im = batch_dict["im_data"][ib]["stitched_image0"]
@@ -309,7 +309,7 @@ def generate_pseudo_labels():
                     u.rphi_to_xy(anns_rphi[:, 0], anns_rphi[:, 1]), axis=1
                 )
                 gts_occluded = np.logical_not(batch_dict["anns_valid_mask"][ib]).astype(
-                    np.int
+                    np.int32
                 )
                 gts_str = pru.drow_detection_to_kitti_string(gts_xy, None, gts_occluded)
             else:

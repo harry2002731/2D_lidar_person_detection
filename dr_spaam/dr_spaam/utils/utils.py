@@ -63,11 +63,6 @@ def scan_to_xy(scan, fov, thresh=None):
     return rphi_to_xy(s, laser_angles(len(scan), fov))
 
 
-def load_scan(fname):
-    data = np.genfromtxt(fname, delimiter=",")
-    seqs, times, scans = data[:,0].astype(np.uint32), data[:,1].astype(np.float32), data[:,2:].astype(np.float32)
-    return seqs, times, scans
-
 ############################################################################################
 
 
@@ -262,6 +257,7 @@ def scans_to_cutout(
     # ), "scan_phi must be symetric and centered around 0"
 
     num_scans, num_pts = scans.shape
+    # _,num_scans, num_pts = scans.shape
 
     # size (width) of the window
     dists = (
@@ -270,7 +266,7 @@ def scans_to_cutout(
         else np.tile(scans[-1, ::stride], num_scans).reshape(num_scans, -1)
     )
     half_alpha = np.arctan(0.5 * window_width / np.maximum(dists, 1e-2))
-
+    
     # cutout indices
     delta_alpha = 2.0 * half_alpha / (num_cutout_pts - 1)
     ang_ct = (
@@ -283,8 +279,8 @@ def scans_to_cutout(
     outbound_mask = np.logical_or(inds_ct < 0, inds_ct > num_pts - 1)
 
     # cutout (linear interp)
-    inds_ct_low = _clip(np.floor(inds_ct), 0, num_pts - 1).astype(np.int32)
-    inds_ct_high = _clip(inds_ct_low + 1, 0, num_pts - 1).astype(np.int32)
+    inds_ct_low = _clip(np.floor(inds_ct), 0, num_pts - 1).astype(np.int16)
+    inds_ct_high = _clip(inds_ct_low + 1, 0, num_pts - 1).astype(np.int16)
     inds_ct_ratio = _clip(inds_ct - inds_ct_low, 0.0, 1.0)
     inds_offset = (
         np.arange(num_scans).reshape(1, num_scans, 1) * num_pts
@@ -694,7 +690,7 @@ def nms_predicted_center(
     p_dist = np.sqrt(np.square(xdiff) + np.square(ydiff))
 
     # nms
-    keep = np.ones(num_pts, dtype=np.bool_)
+    keep = np.ones(num_pts, dtype=bool)
     instance_mask = np.zeros(num_pts, dtype=np.int32)
     instance_id = 1
     for i in range(num_pts):

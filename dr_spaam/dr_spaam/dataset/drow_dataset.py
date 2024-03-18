@@ -50,7 +50,7 @@ class DROWDataset(Dataset):
         data_dict["sequence"] = "all"
 
         # this is used by JRDB dataset to mask out annotations, to be consistent
-        data_dict["anns_valid_mask"] = np.ones(len(data_dict["dets_wp"]), dtype=np.bool)
+        data_dict["anns_valid_mask"] = np.ones(len(data_dict["dets_wp"]), dtype=bool)
 
         return data_dict
 

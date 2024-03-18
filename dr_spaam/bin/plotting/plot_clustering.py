@@ -156,7 +156,7 @@ def _plot_pseudo_labels(batch_dict, ib):
         match_found = d_diff < 0.3  # (pl, gt)
         match_found = match_found.max(axis=1)
     else:
-        match_found = np.zeros(len(pl_xy), dtype=np.bool)
+        match_found = np.zeros(len(pl_xy), dtype=bool)
 
     # overlay image with laser
     im = batch_dict["im_data"][ib]["stitched_image0"]

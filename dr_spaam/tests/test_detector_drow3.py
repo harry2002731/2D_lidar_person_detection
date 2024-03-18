@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-path = r"..\dr_spaam\datasets\DROWv2-data\train\\"
-ckpt = r'..\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
+path = r"C:\Projects\Python\2D_lidar_person_detection\dr_spaam\datasets\DROWv2-data\train\\"
+ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
+# path = r"..\dr_spaam\datasets\DROWv2-data\train\\"
+# ckpt = r'..\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
 detector = Detector(
     ckpt,
     model="DROW3",          # Or DR-SPAAM

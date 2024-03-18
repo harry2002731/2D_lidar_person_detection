@@ -49,7 +49,7 @@ dataset:
     #     tracking: False
 
     DataHandle:
-        data_dir: "./data/DROWv2-data"  # ./data/JRDB or ./data/DROWv2-data
+        data_dir: "C:/Projects/Python/2D_lidar_person_detection/dr_spaam/datasets/DROWv2-data"  # ./data/JRDB or ./data/DROWv2-data
         num_scans: 1
         scan_stride: 1
 

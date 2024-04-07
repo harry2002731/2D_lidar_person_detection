@@ -6,7 +6,8 @@ from matplotlib.animation import FuncAnimation
 import time
 
 path = r"C:\Projects\Python\2D_lidar_person_detection\dr_spaam\datasets\DROWv2-data\\"
-ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\logs\20240314_141409_drow\ckpt\ckpt_e40.pth'
+ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
+# ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\logs\20240314_141409_drow\ckpt\ckpt_e40.pth'
 # ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\weights\ckpt_jrdb_ann_dr_spaam_e20.pth'
 # path = r"..\dr_spaam\datasets\DROWv2-data\train\\"
 # ckpt = r'..\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
@@ -53,7 +54,7 @@ def update(frame):
             start_time = time.time()
             dets_xy, dets_cls, instance_mask = detector(scan)  # xy坐标位置、检测类别、暂时未知
             # print(1/(time.time()-start_time))
-            cls_thresh = 0.3
+            cls_thresh = 0.8
             cls_mask = dets_cls > cls_thresh
             dets_xy = dets_xy[cls_mask]
             dets_cls = dets_cls[cls_mask]

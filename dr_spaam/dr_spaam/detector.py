@@ -1,3 +1,4 @@
+import time
 import torch
 import numpy as np
 
@@ -79,22 +80,28 @@ class Detector(object):
             area_mode=True,
         )
         ct = torch.from_numpy(ct).float()
+        # print(ct[0])
         self.cttt = copy.deepcopy(ct.unsqueeze(dim=0))
 
-
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self._gpu:
             ct = ct.cuda()
-        # print(ct.size())
+            ct = ct.to('cuda')
+
+
         # inference
         with torch.no_grad():
             # one extra dimension for batch
             if self._use_dr_spaam:
                 pred_cls, pred_reg, _ = self._model(ct.unsqueeze(dim=0), inference=True)
             else:
+                start = time.time()
                 pred_cls, pred_reg = self._model(ct.unsqueeze(dim=0))
+                print(time.time()-start)
 
         pred_cls = torch.sigmoid(pred_cls[0]).data.cpu().numpy()
         pred_reg = pred_reg[0].data.cpu().numpy()
+
 
         # postprocess
         dets_xy, dets_cls, instance_mask = u.nms_predicted_center(
@@ -109,7 +116,7 @@ class Detector(object):
     def convert(self):
         traced_script_module = torch.jit.trace(self._model, self.cttt)
         output = traced_script_module(self.cttt)
-        traced_script_module.save('vgg16-trace.pt')
+        traced_script_module.save('cpu.pt')
         
 
 

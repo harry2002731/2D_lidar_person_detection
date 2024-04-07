@@ -258,7 +258,7 @@ def scans_to_cutout(
 
     num_scans, num_pts = scans.shape
     # _,num_scans, num_pts = scans.shape
-
+    
     # size (width) of the window
     dists = (
         scans[:, ::stride]
@@ -306,7 +306,8 @@ def scans_to_cutout(
             )
             ang_ct_area = (ang_ct_area + np.pi) % (2.0 * np.pi) - np.pi  # warp angle
             inds_ct_area = (ang_ct_area - scan_phi[0]) / (scan_phi[1] - scan_phi[0])
-            inds_ct_area = np.rint(_clip(inds_ct_area, 0, num_pts - 1)).astype(np.int32)
+            
+            inds_ct_area = np.rint(_clip(inds_ct_area, 0, num_pts - 1)).astype(np.int32) #rint四舍五入取证
             ct_area = np.take(scans, inds_ct_area + inds_offset)
             ct_area = ct_area.reshape(
                 num_cutout_pts, s_area, num_scans, dists.shape[1]
@@ -349,6 +350,8 @@ def scans_to_cutout_torch(
         torch.arange(num_cutout_pts, device=scans.device).view(num_cutout_pts, 1, 1)
         * delta_alpha
     )
+
+    
     ang_ct = scan_phi[::stride] - half_alpha + ang_step
     ang_ct = (ang_ct + np.pi) % (2.0 * np.pi) - np.pi  # warp angle
     inds_ct = (ang_ct - scan_phi[0]) / (scan_phi[1] - scan_phi[0])

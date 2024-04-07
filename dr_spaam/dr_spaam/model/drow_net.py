@@ -54,6 +54,7 @@ class DrowNet(nn.Module):
             pred_reg (tensor[B, CT, 2])
         """
         n_batch, n_cutout, n_scan, n_pts = x.shape
+        # x = x.to('cuda')
 
         # forward cutout from all scans
         out = x.view(n_batch * n_cutout * n_scan, 1, n_pts)

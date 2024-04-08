@@ -95,9 +95,7 @@ class Detector(object):
             if self._use_dr_spaam:
                 pred_cls, pred_reg, _ = self._model(ct.unsqueeze(dim=0), inference=True)
             else:
-                start = time.time()
                 pred_cls, pred_reg = self._model(ct.unsqueeze(dim=0))
-                print(time.time()-start)
 
         pred_cls = torch.sigmoid(pred_cls[0]).data.cpu().numpy()
         pred_reg = pred_reg[0].data.cpu().numpy()

@@ -5,12 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import time
 
-path = r"C:\Projects\Python\2D_lidar_person_detection\dr_spaam\datasets\DROWv2-data\\"
-ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
-# ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\logs\20240314_141409_drow\ckpt\ckpt_e40.pth'
-# ckpt = r'C:\Projects\Python\2D_lidar_person_detection\dr_spaam\weights\ckpt_jrdb_ann_dr_spaam_e20.pth'
-# path = r"..\dr_spaam\datasets\DROWv2-data\train\\"
-# ckpt = r'..\dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
+global line_num ,scans, scan_seqs
+
+path = r"dr_spaam\datasets\DROWv2-data\harry_test\\"
+ckpt = r'dr_spaam\weights\ckpt_jrdb_pl_drow3_e40.pth'
 detector = Detector(
     ckpt,
     model="DROW3",          # Or DR-SPAAM
@@ -23,19 +21,12 @@ detector = Detector(
 laser_fov_deg = 180
 detector.set_laser_fov(laser_fov_deg)
 
-global line_num ,scans, persons,persons_seqs,scan_seqs
 line_num = 0
 
 csv = path + "n-1r_2024-03-18-18-08-31.bag.csv" #修改方括号内数字测试其余数据
-scans = load_scan(csv)[2] # load_scan返回值 seqs, times, scans
-scan_seqs = load_scan(csv)[0]
+scan_seqs,_,scans = load_scan(csv) # load_scan返回值 seqs, times, scans
 
-# persons = load_dets(path + "n-1r_2015-11-24-18-08-31.bag")[-1]
-# persons_seqs = load_dets(path + "n-1r_2015-11-24-18-08-31.bag")[0]
-# half_fov_rad = 0.5 * np.deg2rad(laser_fov_deg)
-# per_rad = laser_fov_deg/half_fov_rad
-
-
+# 转换为pt文件
 def convetTOTorchScript():
     scan = scans[0]
     detector(scan)  # xy坐标位置、检测类别、暂时未知
@@ -44,7 +35,7 @@ def convetTOTorchScript():
 
 
 def update(frame):
-    global line_num, persons,persons_seqs
+    global line_num
     global scans,scan_seqs
 
     # 生成随机数据
